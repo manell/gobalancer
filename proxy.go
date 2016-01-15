@@ -49,6 +49,13 @@ func NewGoBalancer(opt *Options) (*GoBalancer, error) {
 	return gb, nil
 }
 
+// UseStrategy defines the strategy to be used to decide the routing endpoints for
+// each request
+func (gb *GoBalancer) UseStrategy(b Balancer) {
+	gb.Balancer = b
+}
+
+// Proxy is an HTTP handler that proxies a request to an endpoint
 func (b *GoBalancer) Proxy(w http.ResponseWriter, req *http.Request) {
 	//before endpoint middleware
 
