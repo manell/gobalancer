@@ -24,8 +24,8 @@ type EndPoint struct {
 	URL *url.URL
 }
 
-// Balancer is an interface that represents the ability of returning and enpoint
-// provided a HTTP request.
+// Balancer is an interface that represents the ability to return an endpoint
+// provided an HTTP request.
 type Balancer interface {
 	NextEndpoint(http.Request) (*EndPoint, error)
 }
@@ -50,6 +50,8 @@ func NewGoBalancer(opt *Options) (*GoBalancer, error) {
 }
 
 func (b *GoBalancer) Proxy(w http.ResponseWriter, req *http.Request) {
+	//before endpoint middleware
+
 	ep, _ := b.Balancer.NextEndpoint(*req)
 
 	proxy := httputil.NewSingleHostReverseProxy(ep.URL)
@@ -59,5 +61,6 @@ func (b *GoBalancer) Proxy(w http.ResponseWriter, req *http.Request) {
 		Transport: b.transport,
 	}
 
+	// after endpoint middlerware
 	rProxy.ServeHTTP(w, req)
 }
