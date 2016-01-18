@@ -56,18 +56,18 @@ func (gb *GoBalancer) UseStrategy(b Balancer) {
 }
 
 // Proxy is an HTTP handler that proxies a request to an endpoint
-func (b *GoBalancer) Proxy(w http.ResponseWriter, req *http.Request) {
+func (gb *GoBalancer) Proxy(w http.ResponseWriter, req *http.Request) {
 	//before endpoint middleware
+	//a.next.SErve
 
-	ep, _ := b.Balancer.NextEndpoint(*req)
+	ep, _ := gb.Balancer.NextEndpoint(*req)
 
 	proxy := httputil.NewSingleHostReverseProxy(ep.URL)
 
 	rProxy := &httputil.ReverseProxy{
 		Director:  proxy.Director,
-		Transport: b.transport,
+		Transport: gb.transport,
 	}
 
-	// after endpoint middlerware
 	rProxy.ServeHTTP(w, req)
 }
