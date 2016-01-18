@@ -41,7 +41,7 @@ func TestMiddleware(t *testing.T) {
 	mock := &MockMiddleware{}
 
 	mid := &MiddlewareChain{}
-	mid.Use(mock)
+	mid.Add(mock)
 
 	req, err := http.NewRequest("GET", "http://var.com/foo", nil)
 	if err != nil {
@@ -63,9 +63,9 @@ func TestMiddlewareChain(t *testing.T) {
 
 	mid := &MiddlewareChain{}
 
-	mid.Use(mock1)
-	mid.Use(mock2)
-	mid.Use(mock3)
+	mid.Add(mock1)
+	mid.Add(mock2)
+	mid.Add(mock3)
 
 	req, err := http.NewRequest("GET", "http://var.com/foo", nil)
 	if err != nil {

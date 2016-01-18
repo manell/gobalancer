@@ -73,6 +73,11 @@ func NewGoBalancer(opt *Options, balancer Balancer) (*GoBalancer, error) {
 	return gb, nil
 }
 
+// Use adds a new middleware into the middlewares chain
+func (gb *GoBalancer) Use(middleware Middleware) {
+	gb.middlewares.Add(middleware)
+}
+
 // Proxy is an HTTP handler that run the defined middlewares chain
 func (gb *GoBalancer) Proxy(w http.ResponseWriter, req *http.Request) {
 	gb.middlewares.Run(w, req)

@@ -14,8 +14,8 @@ type MiddlewareChain struct {
 	chain http.Handler
 }
 
-// Use adds a new middleware to the chain
-func (m *MiddlewareChain) Use(middleware Middleware) {
+// Add adds a new middleware to the chain
+func (m *MiddlewareChain) Add(middleware Middleware) {
 	m.chain = middleware.NewMiddleware(m.chain)
 }
 
