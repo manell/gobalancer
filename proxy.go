@@ -15,8 +15,9 @@ type Options struct {
 // GoBalancer is an HTTP handler that takes incomning requests and sends to
 // another server. The destination server is determined by an algorithm.
 type GoBalancer struct {
-	Balancer  Balancer
-	transport *http.Transport
+	Balancer    Balancer
+	middlewares *MiddlewareChain
+	transport   *http.Transport
 }
 
 // EndPoint is a destination address where the balancer can proxy requests.
@@ -46,6 +47,8 @@ func NewGoBalancer(opt *Options) (*GoBalancer, error) {
 		transport: tp,
 	}
 
+	gb.middlewares = &MiddlewareChain{chain: gb} // split gb parts into ...
+
 	return gb, nil
 }
 
@@ -55,11 +58,8 @@ func (gb *GoBalancer) UseStrategy(b Balancer) {
 	gb.Balancer = b
 }
 
-// Proxy is an HTTP handler that proxies a request to an endpoint
-func (gb *GoBalancer) Proxy(w http.ResponseWriter, req *http.Request) {
-	//before endpoint middleware
-	//a.next.SErve
-
+// ServeHTTP is an HTTP handler that proxies a request to an endpoint
+func (gb *GoBalancer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ep, _ := gb.Balancer.NextEndpoint(*req)
 
 	proxy := httputil.NewSingleHostReverseProxy(ep.URL)
@@ -70,4 +70,9 @@ func (gb *GoBalancer) Proxy(w http.ResponseWriter, req *http.Request) {
 	}
 
 	rProxy.ServeHTTP(w, req)
+}
+
+// Proxy is an HTTP handler that run the defined middlewares chain
+func (gb *GoBalancer) Proxy(w http.ResponseWriter, req *http.Request) {
+	gb.middlewares.Run(w, req)
 }
