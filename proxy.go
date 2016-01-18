@@ -33,7 +33,7 @@ type Balancer interface {
 
 // NewGoBalancer returns a new instance of a GoBalancer. It returns an error if
 // some configuration is missing.
-func NewGoBalancer(opt *Options) (*GoBalancer, error) {
+func NewGoBalancer(opt *Options, balancer Balancer) (*GoBalancer, error) {
 	tp := &http.Transport{
 		MaxIdleConnsPerHost: 200,
 		Dial: (&net.Dialer{
@@ -45,17 +45,12 @@ func NewGoBalancer(opt *Options) (*GoBalancer, error) {
 
 	gb := &GoBalancer{
 		transport: tp,
+		Balancer:  balancer,
 	}
 
 	gb.middlewares = &MiddlewareChain{chain: gb} // split gb parts into ...
 
 	return gb, nil
-}
-
-// UseStrategy defines the strategy to be used to decide the routing endpoints for
-// each request
-func (gb *GoBalancer) UseStrategy(b Balancer) {
-	gb.Balancer = b
 }
 
 // ServeHTTP is an HTTP handler that proxies a request to an endpoint

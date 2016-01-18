@@ -6,15 +6,6 @@ import (
 	"testing"
 )
 
-func TestNewGoBalancer(t *testing.T) {
-	opts := &Options{}
-
-	_, err := NewGoBalancer(opts)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestGoBalancerSimpleStrategy(t *testing.T) {
 	response := "I'm the backend"
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -24,17 +15,15 @@ func TestGoBalancerSimpleStrategy(t *testing.T) {
 
 	opts := &Options{}
 
-	gb, err := NewGoBalancer(opts)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	sb, err := NewSimpleBalancer(backend.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	gb.UseStrategy(sb)
+	gb, err := NewGoBalancer(opts, sb)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	req, err := http.NewRequest("GET", "http://var.com/foo", nil)
 	if err != nil {
