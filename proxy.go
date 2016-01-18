@@ -12,14 +12,6 @@ import (
 type Options struct {
 }
 
-// GoBalancer is an HTTP handler that takes incomning requests and sends to
-// another server. The destination server is determined by an algorithm.
-type GoBalancer struct {
-	Balancer    Balancer
-	middlewares *MiddlewareChain
-	transport   *http.Transport
-}
-
 // EndPoint is a destination address where the balancer can proxy requests.
 type EndPoint struct {
 	URL *url.URL
@@ -29,6 +21,32 @@ type EndPoint struct {
 // provided an HTTP request.
 type Balancer interface {
 	NextEndpoint(http.Request) (*EndPoint, error)
+}
+
+// Dispatcher proxies HTPP requests to the endpoints selected by the balancer
+type Dispatcher struct {
+	Balancer  Balancer
+	transport *http.Transport
+}
+
+// ServeHTTP is an HTTP handler that proxies a request to an endpoint
+func (d *Dispatcher) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	ep, _ := d.Balancer.NextEndpoint(*req)
+
+	proxy := httputil.NewSingleHostReverseProxy(ep.URL)
+
+	rProxy := &httputil.ReverseProxy{
+		Director:  proxy.Director,
+		Transport: d.transport,
+	}
+
+	rProxy.ServeHTTP(w, req)
+}
+
+// GoBalancer is an HTTP handler that takes incomning requests and sends to
+// another server. The destination server is determined by an algorithm.
+type GoBalancer struct {
+	middlewares *MiddlewareChain
 }
 
 // NewGoBalancer returns a new instance of a GoBalancer. It returns an error if
@@ -43,28 +61,16 @@ func NewGoBalancer(opt *Options, balancer Balancer) (*GoBalancer, error) {
 		// TLSHandshakeTimeout: 10 * time.Second,
 	}
 
-	gb := &GoBalancer{
-		transport: tp,
+	dispatcher := &Dispatcher{
 		Balancer:  balancer,
+		transport: tp,
 	}
 
-	gb.middlewares = &MiddlewareChain{chain: gb} // split gb parts into ...
+	gb := &GoBalancer{
+		middlewares: &MiddlewareChain{chain: dispatcher},
+	}
 
 	return gb, nil
-}
-
-// ServeHTTP is an HTTP handler that proxies a request to an endpoint
-func (gb *GoBalancer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	ep, _ := gb.Balancer.NextEndpoint(*req)
-
-	proxy := httputil.NewSingleHostReverseProxy(ep.URL)
-
-	rProxy := &httputil.ReverseProxy{
-		Director:  proxy.Director,
-		Transport: gb.transport,
-	}
-
-	rProxy.ServeHTTP(w, req)
 }
 
 // Proxy is an HTTP handler that run the defined middlewares chain
