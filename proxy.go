@@ -9,8 +9,9 @@ import (
 	"github.com/manell/gobalancer/strategy"
 )
 
-// Options is an object that defines the load balancer configuration.
+// Options defines the load balancer configuration.
 type Options struct {
+	MaxIdleConnsPerHost int
 }
 
 // Balancer is an interface that represents the ability to return an endpoint
@@ -48,13 +49,18 @@ type GoBalancer struct {
 // NewGoBalancer returns a new instance of a GoBalancer. It returns an error if
 // some configuration is missing.
 func NewGoBalancer(opt *Options, balancer Balancer) (*GoBalancer, error) {
+	maxIdleConnsPerHost := 2
+	if opt.MaxIdleConnsPerHost != 0 {
+		maxIdleConnsPerHost = opt.MaxIdleConnsPerHost
+	}
+
 	tp := &http.Transport{
-		MaxIdleConnsPerHost: 200,
+		MaxIdleConnsPerHost: maxIdleConnsPerHost,
 		Dial: (&net.Dialer{
-			Timeout: 30 * time.Second,
-			// KeepAlive: 30 * time.Second,
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
 		}).Dial,
-		// TLSHandshakeTimeout: 10 * time.Second,
+		TLSHandshakeTimeout: 10 * time.Second,
 	}
 
 	dispatcher := &Dispatcher{
