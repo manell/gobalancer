@@ -1,4 +1,4 @@
-package gobalancer
+package strategy
 
 import (
 	"net/http"

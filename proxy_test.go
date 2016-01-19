@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/manell/gobalancer/strategy"
 )
 
 func TestGoBalancerSimpleStrategy(t *testing.T) {
@@ -15,7 +17,7 @@ func TestGoBalancerSimpleStrategy(t *testing.T) {
 
 	opts := &Options{}
 
-	sb, err := NewSimpleBalancer(backend.URL)
+	sb, err := strategy.NewSimpleBalancer(backend.URL)
 	if err != nil {
 		t.Fatal(err)
 	}

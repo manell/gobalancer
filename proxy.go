@@ -4,23 +4,19 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 	"time"
+
+	"github.com/manell/gobalancer/strategy"
 )
 
 // Options is an object that defines the load balancer configuration.
 type Options struct {
 }
 
-// EndPoint is a destination address where the balancer can proxy requests.
-type EndPoint struct {
-	URL *url.URL
-}
-
 // Balancer is an interface that represents the ability to return an endpoint
 // provided an HTTP request.
 type Balancer interface {
-	NextEndpoint(http.Request) (*EndPoint, error)
+	NextEndpoint(http.Request) (*strategy.EndPoint, error)
 }
 
 // Dispatcher proxies HTPP requests to the endpoints selected by the balancer
