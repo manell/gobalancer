@@ -7,7 +7,7 @@ Just run:
 ```go get github.com/manell/gobalancer```
 
 ## Usage
-The simplest way to get an example runngin is by using the standard library and a simple strategy defined in the package.
+The simplest way to get an example running is by using the standard library and a simple strategy defined in the package.
 
 ```go
 import (
