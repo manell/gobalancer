@@ -51,3 +51,7 @@ The gobalancer itself it is just a go ```http.handler```, so it not provides any
 
 ## Middlewares
 ## Strategy
+
+## TODO
+- [ ] Health checks
+- [ ] Custom proxy function with response logging
