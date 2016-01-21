@@ -46,7 +46,7 @@ func main() {
 ```
 
 ## Built as a handler
-The gobalanser itself it is just a go ```http.handler```, so it not give any support on how you should run or configure the HTTP server that is going to host the balancer. Instead of doing this, the package provides an object that implements the ```http.handler``` interface, and lets the user decide about what server should run. What this really means is that this balancer is fully compatible with the standard go library ```http```, so deciding with package to use is up to you.
+The gobalancer itself it is just a go ```http.handler```, so it not provides any support on how you should run or configure the HTTP server that is going to host the balancer. Instead of doing this, the package provides an object that implements the ```http.handler``` interface, and lets the user decide about what server should run. What this really means is that this balancer is fully compatible with the standard go library ```http```, so deciding with package to use is up to you.
 
 
 ## Middlewares
